@@ -1,4 +1,9 @@
 const db = require("../connection")
+const format = require('pg-format')
+const {
+  convertTimestampToDate,
+  getArticleIdByTitle
+} = require("./utils");
 
 // ORDER:
 // DROP: comments, articles, users, topics
@@ -18,78 +23,118 @@ const seed = ({ topicData, userData, articleData, commentData }) => {
     })
     .then(() => {
       return db.query(`CREATE TABLE topics (
-
-      *** slug {field which is a unique string that acts as the table's primary key (a slug is a term used in publishing to identify an article)},
-
-      description {field which is a string giving a brief description of a given topic},
-
-      img_url { field which contains a string containing a link to an image representing the topic}
+      slug VARCHAR(100) PRIMARY KEY,
+      description VARCHAR(255) NOT NULL,
+      img_url VARCHAR(1000) NOT NULL
       );`)
     })
     .then(() => {
       return db.query(`CREATE TABLE users (
-
-      username {which is the primary key & unique},
-
-      name ,
-
-      avatar_url
+      username VARCHAR(100) PRIMARY KEY,
+      name VARCHAR(100) NOT NULL,
+      avatar_url VARCHAR(1000) NOT NULL
       );`)
     })
     .then(() => {
       return db.query(`CREATE TABLE articles (
-
       article_id SERIAL PRIMARY KEY,
-
-      title ,
-
-      topic {field which references the slug in the topics table},
-
-      author {field that references a user's primary key (username)},
-
+      title VARCHAR(100) NOT NULL,
+      topic VARCHAR(100) NOT NULL REFERENCES topics(slug),
+      author VARCHAR(100) NOT NULL REFERENCES users(username),
       body TEXT NOT NULL,
-
-      created_at TIMESTAMP NOT NULL DEFAULT now(),
-
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
       votes INT NOT NULL DEFAULT 0,
-
-      article_img_url
-
+      article_img_url VARCHAR(1000) NOT NULL
       );`)
     })
     .then(() => {
       return db.query(`CREATE TABLE comments (
-
       comment_id SERIAL PRIMARY KEY,
-
-      article_id {field that references an article's primary key},
-
+      article_id INT NOT NULL REFERENCES articles(article_id),
       body TEXT NOT NULL,
-
       votes INT NOT NULL DEFAULT 0,
-
-      author {field that references a user's primary key (username)},
-
-      created_at TIMESTAMP NOT NULL DEFAULT now()
+      author VARCHAR(100) NOT NULL REFERENCES users(username),
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       );`)
     })
+    .then(() => {
+      const formattedTopicData = topicData.map((topic) => {
+        return [
+          topic.slug,
+          topic.description,
+          topic.img_url
+        ]
+      })
+      const insertTopicsQuery = format(
+        `INSERT INTO topics (slug, description, img_url) VALUES %L;`, formattedTopicData
+      )
+      return db.query(insertTopicsQuery)
+    })
+    .then(() => {
+      const formattedUserData = userData.map((user) => {
+        return [
+          user.username,
+          user.name,
+          user.avatar_url
+        ]
+      })
+      const insertUsersQuery = format(
+        `INSERT INTO users (username, name, avatar_url) VALUES %L;`, formattedUserData
+      )
+      return db.query(insertUsersQuery)
+    })
+    .then(() => {
+      const formattedArticleData = articleData.map((article) => {
+        const articleTimestamp = convertTimestampToDate(article)
+        return [
+          article.title,
+          article.topic,
+          article.author,
+          article.body,
+          articleTimestamp.created_at,
+          article.votes,
+          article.article_img_url
+        ]
+      })
+      const insertArticlesQuery = format(
+        `INSERT INTO articles (title, topic, author, body, created_at, votes, article_img_url) VALUES %L;`, formattedArticleData
+      )
+      return db.query(insertArticlesQuery)
+    })
 
+    .then(() => {
+      return db.query('SELECT article_id, title FROM articles;')
+    })
+    .then((result) => {
+      //console.log(result.rows)
+      const articleIdFromTitleLookupArr = result.rows.map(pair => {
+        //console.log([pair.article_id, pair.title])
+        return [pair.article_id, pair.title]
+      })
+      return articleIdFromTitleLookupArr
+    })
+    .then((articleIdFromTitleLookupArr) => {
+      console.log(articleIdFromTitleLookupArr)
+      const formattedCommentData = commentData.map((comment) => {
+        const commentTimestamp = convertTimestampToDate(comment)
+        const article_id = getArticleIdByTitle(comment.article_title, articleIdFromTitleLookupArr)
+        return [
+          article_id,
+          comment.body,
+          comment.votes,
+          comment.author,
+          commentTimestamp.created_at
+        ]
+      })
+      const insertCommentsQuery = format(
+        `INSERT INTO comments (article_id, body, votes, author, created_at) VALUES %L;`, formattedCommentData
+      )
+      return db.query(insertCommentsQuery)
+
+    })
 };
+
 module.exports = seed;
 
 
-// make sure NOT NULL included when appropriate
-// make sure each is given appropriate data type
-
-// comments references article id from articles. 
-// comments must be dropped before article
-// article must be made before comments
-
-// comments and articles references author from users username
-// comments must be dropped before article which is dropped before users
-// users must be made before article and comments. article must be made before comments
-
-// articles references the slug from topics
-// articles must be dropped before topics
-// topics must be created before articles
 

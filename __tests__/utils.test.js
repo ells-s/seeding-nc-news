@@ -1,5 +1,6 @@
 const {
-  convertTimestampToDate
+  convertTimestampToDate,
+  getArticleIdByTitle
 } = require("../db/seeds/utils");
 
 describe("convertTimestampToDate", () => {
@@ -38,3 +39,33 @@ describe("convertTimestampToDate", () => {
   });
 });
 
+describe("getArticleIdByTitle", () => {
+  test("returns null if title is not found", () => {
+    const title = "UNCOVERED: catspiracy to bring down democracy"
+    const lookUpArr = [[1, "Living in the shadow of a great man"], [2, "Sony Vaio; or, The Laptop"], [3, "Eight pug gifs that remind me of mitch"], [4, "Student SUES Mitch!"]]
+    const expectedOutcome = null
+    const actualOutcome = getArticleIdByTitle(title, lookUpArr)
+    expect(actualOutcome).toBe(expectedOutcome)
+  })
+  test("returns a number (article id) if title is found", () => {
+    const title = "Student SUES Mitch!"
+    const lookUpArr = [[1, "Living in the shadow of a great man"], [2, "Sony Vaio; or, The Laptop"], [3, "Eight pug gifs that remind me of mitch"], [4, "Student SUES Mitch!"]]
+    const expectedOutcome = 4
+    const actualOutcome = getArticleIdByTitle(title, lookUpArr)
+    expect(actualOutcome).toBe(expectedOutcome)
+  })
+  test("does not mutate title", () => {
+    const title = "Student SUES Mitch!"
+    const titleCopy = "Student SUES Mitch!"
+    const lookUpArr = [[1, "Living in the shadow of a great man"], [2, "Sony Vaio; or, The Laptop"], [3, "Eight pug gifs that remind me of mitch"], [4, "Student SUES Mitch!"]]
+    getArticleIdByTitle(title, lookUpArr)
+    expect(title).toBe(titleCopy)
+  })
+  test("does not mutate lookupArray", () => {
+    const title = "Student SUES Mitch!"
+    const lookUpArr = [[1, "Living in the shadow of a great man"], [2, "Sony Vaio; or, The Laptop"], [3, "Eight pug gifs that remind me of mitch"], [4, "Student SUES Mitch!"]]
+    const lookUpArrCopy = [[1, "Living in the shadow of a great man"], [2, "Sony Vaio; or, The Laptop"], [3, "Eight pug gifs that remind me of mitch"], [4, "Student SUES Mitch!"]]
+    getArticleIdByTitle(title, lookUpArr)
+    expect(lookUpArr).toEqual(lookUpArrCopy)
+  })
+})

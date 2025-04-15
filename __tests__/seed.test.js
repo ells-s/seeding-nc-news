@@ -246,7 +246,7 @@ describe('seed', () => {
           AND ccu.column_name = 'slug';
       `)
         .then(({ rows }) => {
-          expect(rows).toHaveLength(1); 
+          expect(rows).toHaveLength(1);
         });
     });
 
@@ -279,7 +279,7 @@ describe('seed', () => {
           AND ccu.column_name = 'username';
       `)
         .then(({ rows }) => {
-          expect(rows).toHaveLength(1); 
+          expect(rows).toHaveLength(1);
         });
     });
 
@@ -317,7 +317,7 @@ describe('seed', () => {
         FROM information_schema.columns
         WHERE table_name = 'articles'
         AND column_name = 'created_at';`
-      ).then(({ rows: [{ column_default }] }) => { 
+      ).then(({ rows: [{ column_default }] }) => {
         expect(column_default).toBe('CURRENT_TIMESTAMP');
       });
     });
@@ -336,13 +336,13 @@ describe('seed', () => {
         });
     });
 
-    test('votes column has default value of 0', () => { 
+    test('votes column has default value of 0', () => {
       return db.query(
         `SELECT column_default
           FROM information_schema.columns
           WHERE table_name = 'articles'
           AND column_name = 'votes'`
-      ).then(({ rows: [{ column_default }] }) => { 
+      ).then(({ rows: [{ column_default }] }) => {
         expect(column_default).toBe('0');
       });
     });
@@ -439,7 +439,7 @@ describe('seed', () => {
           AND ccu.table_name = 'articles'
           AND ccu.column_name = 'article_id';
       `).then(({ rows }) => {
-        expect(rows).toHaveLength(1); 
+        expect(rows).toHaveLength(1);
       });
     });
 
@@ -471,18 +471,18 @@ describe('seed', () => {
         });
     });
 
-    test('votes column has default value of 0', () => { 
+    test('votes column has default value of 0', () => {
       return db.query(
         `SELECT column_default
           FROM information_schema.columns
           WHERE table_name = 'comments'
           AND column_name = 'votes'`
-      ).then(({ rows: [{ column_default }] }) => { 
+      ).then(({ rows: [{ column_default }] }) => {
         expect(column_default).toBe('0');
       });
     });
 
-    test("comments table has an author column as varying character", () => { 
+    test("comments table has an author column as varying character", () => {
       return db
         .query(
           `SELECT *
@@ -496,7 +496,7 @@ describe('seed', () => {
         });
     })
 
-    test("author column references a username from the users table", () => { 
+    test("author column references a username from the users table", () => {
       return db.query(`
         SELECT *
         FROM information_schema.table_constraints AS tc
@@ -511,7 +511,7 @@ describe('seed', () => {
           AND ccu.column_name = 'username';
       `)
         .then(({ rows }) => {
-          expect(rows).toHaveLength(1); 
+          expect(rows).toHaveLength(1);
         });
     })
 
@@ -535,7 +535,7 @@ describe('seed', () => {
         FROM information_schema.columns
         WHERE table_name = 'comments'
         AND column_name = 'created_at';`
-      ).then(({ rows: [{ column_default }] }) => { 
+      ).then(({ rows: [{ column_default }] }) => {
         expect(column_default).toBe('CURRENT_TIMESTAMP');
       });
     });
@@ -566,7 +566,7 @@ describe('data insertion', () => {
       });
     });
   });
-  
+
   test('articles data has been inserted correctly', () => {
     return db.query(`SELECT * FROM articles;`).then(({ rows: articles }) => {
       expect(articles).toHaveLength(13);
@@ -582,7 +582,7 @@ describe('data insertion', () => {
       });
     });
   });
-  
+
   test('comments data has been inserted correctly', () => {
     return db.query(`SELECT * FROM comments;`).then(({ rows: comments }) => {
       expect(comments).toHaveLength(18);
