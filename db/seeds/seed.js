@@ -114,7 +114,7 @@ const seed = ({ topicData, userData, articleData, commentData }) => {
       return articleIdFromTitleLookupArr
     })
     .then((articleIdFromTitleLookupArr) => {
-      console.log(articleIdFromTitleLookupArr)
+      //console.log(articleIdFromTitleLookupArr)
       const formattedCommentData = commentData.map((comment) => {
         const commentTimestamp = convertTimestampToDate(comment)
         const article_id = getArticleIdByTitle(comment.article_title, articleIdFromTitleLookupArr)
@@ -133,6 +133,7 @@ const seed = ({ topicData, userData, articleData, commentData }) => {
 
     })
 };
+
 
 module.exports = seed;
 
