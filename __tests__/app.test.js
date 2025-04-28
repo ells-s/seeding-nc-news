@@ -25,3 +25,28 @@ describe("GET /api", () => {
       });
   });
 });
+
+describe("GET /api/topics", () => {
+  test("200: responds with all requested topics", () => {
+    return request(app)
+      .get("/api/topics")
+      .expect(200)
+      .then(({ body }) => {
+        expect(Array.isArray(body.topics)).toBe(true);
+        expect(body.topics.length).toBe(3);
+        body.topics.forEach((topic) => {
+          expect(typeof topic.description).toBe("string");
+          expect(typeof topic.slug).toBe("string");
+          expect(topic.img_url).toBe("");
+        });
+      });
+  });
+  test("404: responds when URL doesn't exist", () => {
+    return request(app)
+      .get("/api/topicz")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Not Found");
+      });
+  });
+});
