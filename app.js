@@ -4,6 +4,7 @@ const db = require("./db/connection");
 const { getApi } = require("./app/controllers/api.controller");
 const { getTopics } = require("./app/controllers/topics.controller");
 const { getArticleById, getArticles } = require("./app/controllers/articles.controller");
+const { getCommentsByArticleId } = require("./app/controllers/comments.controller")
 
 app.get("/api", getApi);
 
@@ -12,6 +13,8 @@ app.get("/api/topics", getTopics);
 app.get("/api/articles/:article_id", getArticleById);
 
 app.get("/api/articles", getArticles);
+
+app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
 
 app.all("/*splat", (req, res) => {
     res.status(404).send({ msg: "Not Found" });

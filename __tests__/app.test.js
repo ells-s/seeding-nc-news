@@ -122,3 +122,53 @@ describe("GET /api/articles", () => {
       });
   });
 });
+
+describe("GET /api/articles/:article_id/comments", () => {
+  test("200: responds with array of comments for the requested article", () => {
+    return request(app)
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then(({ body }) => {
+        expect(Array.isArray(body.comments)).toBe(true);
+        expect(body.comments.length).toBe(11);
+        const datesArray = [];
+        body.comments.forEach((comment) => {
+          expect(typeof comment.comment_id).toBe("number");
+          expect(typeof comment.votes).toBe("number");
+          expect(typeof comment.created_at).toBe("string");
+          expect(typeof comment.author).toBe("string");
+          expect(typeof comment.body).toBe("string");
+          expect(typeof comment.article_id).toBe("number");
+          datesArray.push(comment.created_at)
+        });
+        expect(datesArray.length).toBeGreaterThan(0)
+        expect(datesArray).toBeSorted({ descending: true });
+      });
+  });
+  test("200: responds with empty array for the requested article if it contains no comments but it a valid article id", () => {
+    return request(app)
+      .get("/api/articles/2/comments")
+      .expect(200)
+      .then(({ body }) => {
+        expect(Array.isArray(body.comments)).toBe(true);
+        expect(body.comments.length).toBe(0);
+        expect(body.comments).toEqual([])
+      });
+  });
+  test("404: responds with 404 when passed with a number not assigned to article_id", () => {
+    return request(app)
+      .get("/api/articles/10000/comments")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Article with id 10000 Not Found");
+      });
+  });
+  test("400: responds with 400 when passed a bad request of an invalid article_id", () => {
+    return request(app)
+      .get("/api/articles/string/comments")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+});
