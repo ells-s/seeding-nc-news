@@ -4,7 +4,9 @@ const db = require("./db/connection");
 const { getApi } = require("./app/controllers/api.controller");
 const { getTopics } = require("./app/controllers/topics.controller");
 const { getArticleById, getArticles } = require("./app/controllers/articles.controller");
-const { getCommentsByArticleId } = require("./app/controllers/comments.controller")
+const { getCommentsByArticleId, postCommentToArticle } = require("./app/controllers/comments.controller")
+
+app.use(express.json());
 
 app.get("/api", getApi);
 
@@ -16,12 +18,14 @@ app.get("/api/articles", getArticles);
 
 app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
 
+app.post("/api/articles/:article_id/comments", postCommentToArticle)
+
 app.all("/*splat", (req, res) => {
     res.status(404).send({ msg: "Not Found" });
 });
 
 app.use((err, req, res, next) => {
-    if (err.code === "22P02") {
+    if (err.code === "22P02" || err.code === "23502") {
         res.status(400).send({ msg: "Bad Request" });
     }
     else {
