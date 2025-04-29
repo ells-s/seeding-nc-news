@@ -172,3 +172,88 @@ describe("GET /api/articles/:article_id/comments", () => {
       });
   });
 });
+
+describe("POST /api/articles/:article_id/comments", () => {
+  test("201 responds with a 201 status and responds with the newly posted comment", () => {
+    const commentObj = {
+      username: "butter_bridge",
+      body: "butter_bridge writing a comment on article with the id 1"
+    };
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send(commentObj)
+      .expect(201)
+      .then(({ body }) => {
+        expect(body.comment.comment_id).toBe(19);
+        expect(body.comment.article_id).toBe(1);
+        expect(body.comment.body).toBe("butter_bridge writing a comment on article with the id 1");
+        expect(body.comment.votes).toBe(0);
+        expect(body.comment.author).toBe("butter_bridge");
+        expect(typeof body.comment.created_at).toBe("string");
+      });
+  });
+  test("400 responds with 400 when assigned an invalid data type", () => {
+    const commentObj = {
+      username: "butter_bridge",
+      body: 44
+    };
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send(commentObj)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+  test("400 responds with 400 when a required key is missing", () => {
+    const commentObj = {
+      username: "butter_bridge"
+    };
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send(commentObj)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+  test("400: responds with 400 when passed a bad request of an invalid article_id", () => {
+    const commentObj = {
+      username: "butter_bridge",
+      body: "butter_bridge writing a comment on article with the id string"
+    };
+    return request(app)
+      .post("/api/articles/string/comments")
+      .send(commentObj)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+  test("404 responds with 404 when passed with a number not assigned to article_id", () => {
+    const commentObj = {
+      username: "butter_bridge",
+      body: "butter_bridge writing a comment on article with the id 1000"
+    };
+    return request(app)
+      .post("/api/articles/1000/comments")
+      .send(commentObj)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Article with id 1000 Not Found");
+      });
+  });
+  test("404 responds with 404 when the username does not exist", () => {
+    const commentObj = {
+      username: "invalid_username",
+      body: "writing a comment on article with the id 1"
+    };
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send(commentObj)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("User with username invalid_username Not Found");
+      });
+  });
+});
