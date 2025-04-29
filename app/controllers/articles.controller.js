@@ -1,5 +1,5 @@
 const app = require("../../app");
-const { selectArticleById, checkIfArticleExists } = require("../models/articles.model");
+const { selectArticleById, checkIfArticleExists, selectArticles } = require("../models/articles.model");
 
 exports.getArticleById = (req, res, next) => {
     const { article_id } = req.params;
@@ -14,3 +14,10 @@ exports.getArticleById = (req, res, next) => {
             next(err);
         });
 };
+
+exports.getArticles = (req, res, next) => {
+    return selectArticles().then((articles) => {
+        res.status(200).send({ articles });
+    });
+};
+

@@ -5,6 +5,8 @@ const seed = require("../db/seeds/seed");
 const data = require("../db/data/test-data");
 const request = require("supertest");
 const app = require("../app");
+const jestSorted = require('jest-sorted');
+
 
 /* Set up your beforeEach & afterAll functions here */
 beforeEach(() => {
@@ -82,6 +84,41 @@ describe("GET /api/articles/:article_id", () => {
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("Bad Request");
+      });
+  });
+});
+
+describe("GET /api/articles", () => {
+  test("200: responds with all requested articles", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body }) => {
+        expect(Array.isArray(body.articles)).toBe(true);
+        expect(body.articles.length).toBe(13);
+        const datesArray = [];
+        body.articles.forEach((article) => {
+          expect(typeof article.article_id).toBe("number");
+          expect(typeof article.title).toBe("string");
+          expect(typeof article.topic).toBe("string");
+          expect(typeof article.author).toBe("string");
+          expect(typeof article.created_at).toBe("string");
+          expect(typeof article.votes).toBe("number");
+          expect(typeof article.article_img_url).toBe("string");
+          expect(typeof article.comment_count).toBe("number");
+          expect(article).not.toHaveProperty("body")
+          datesArray.push(article.created_at)
+        });
+        expect(datesArray.length).toBeGreaterThan(0)
+        expect(datesArray).toBeSorted({ descending: true });
+      });
+  });
+  test("404: reponds when URL doesn't exist", () => {
+    return request(app)
+      .get("/api/articlez")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Not Found");
       });
   });
 });
