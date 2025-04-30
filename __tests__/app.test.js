@@ -5,7 +5,7 @@ const seed = require("../db/seeds/seed");
 const data = require("../db/data/test-data");
 const request = require("supertest");
 const app = require("../app");
-const jestSorted = require('jest-sorted');
+const { toBeSortedBy } = require('jest-sorted');
 
 
 /* Set up your beforeEach & afterAll functions here */
@@ -374,7 +374,7 @@ describe("GET /api/users", () => {
       .then(({ body }) => {
         expect(Array.isArray(body.users)).toBe(true);
         expect(body.users.length).toBe(4);
-        console.log(body, '<---- users')
+        //console.log(body, '<---- users')
         body.users.forEach((user) => {
           expect(typeof user.username).toBe("string");
           expect(typeof user.name).toBe("string");
@@ -388,6 +388,69 @@ describe("GET /api/users", () => {
       .expect(404)
       .then(({ body }) => {
         expect(body.msg).toBe("Not Found");
+      });
+  });
+});
+
+describe("GET /api/articles?sort_by=:property&order=:order", () => {
+  // checking sort works with string datatype - title
+  test("200: responds with all requested articles sorted by title in ascending order", () => {
+    return request(app)
+      .get("/api/articles?sort_by=title&order=asc")
+      .expect(200)
+      .then(({ body }) => {
+        expect(Array.isArray(body.articles)).toBe(true);
+        expect(body.articles.length).toBe(13);
+        body.articles.forEach((article) => {
+          expect(typeof article.article_id).toBe("number");
+          expect(typeof article.title).toBe("string");
+          expect(typeof article.topic).toBe("string");
+          expect(typeof article.author).toBe("string");
+          expect(typeof article.created_at).toBe("string");
+          expect(typeof article.votes).toBe("number");
+          expect(typeof article.article_img_url).toBe("string");
+          expect(typeof article.comment_count).toBe("number");
+          expect(article).not.toHaveProperty("body")
+        });
+        expect(body.articles).toBeSortedBy("title", { descending: false });
+      });
+  });
+  // checking sort works with number datatype - comment_count
+  test("200: responds with all requested articles sorted by comment_count in descending order", () => {
+    return request(app)
+      .get("/api/articles?sort_by=comment_count&order=desc")
+      .expect(200)
+      .then(({ body }) => {
+        expect(Array.isArray(body.articles)).toBe(true);
+        expect(body.articles.length).toBe(13);
+        body.articles.forEach((article) => {
+          expect(typeof article.article_id).toBe("number");
+          expect(typeof article.title).toBe("string");
+          expect(typeof article.topic).toBe("string");
+          expect(typeof article.author).toBe("string");
+          expect(typeof article.created_at).toBe("string");
+          expect(typeof article.votes).toBe("number");
+          expect(typeof article.article_img_url).toBe("string");
+          expect(typeof article.comment_count).toBe("number");
+          expect(article).not.toHaveProperty("body")
+        });
+        expect(body.articles).toBeSortedBy("comment_count", { descending: true });
+      });
+  });
+  test("400: responds with 400 when sort_by is not assigned a valid column", () => {
+    return request(app)
+      .get("/api/articles?sort_by=not_valid&order=desc")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("not_valid is an invalid sort_by column")
+      });
+  });
+  test("400: responds with 400 when order is not assigned a valid value", () => {
+    return request(app)
+      .get("/api/articles?sort_by=title&order=backwards")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("backwards is an invalid order value")
       });
   });
 });
