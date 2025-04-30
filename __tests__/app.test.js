@@ -310,7 +310,6 @@ describe("PATCH /api/articles/:article_id", () => {
       .send({})
       .expect(400)
       .then(({ body }) => {
-        console.log(body.msg)
         expect(body.msg).toBe("Bad Request");
       });
   });
@@ -331,5 +330,38 @@ describe("PATCH /api/articles/:article_id", () => {
       .then(({ body }) => {
         expect(body.msg).toBe("Article with id 1000 Not Found");
       });
+  });
+});
+
+describe("DELETE /api/comments/:comment_id", () => {
+  test("204: deletes comment when provided with valid comment_id", () => {
+    return request(app)
+      .delete("/api/comments/1")
+      .expect(204)
+      .then(({ body }) => {
+        expect(body).toEqual({});
+      })
+      .then(() => {
+        return db.query(`SELECT * FROM comments`)
+      })
+      .then(({ rows }) => {
+        expect(rows.length).toBe(17)
+      });
+  });
+  test("400 responds with 400 when comment_id is an invalid data type", () => {
+    return request(app)
+      .delete("/api/comments/string")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      })
+  });
+  test("404 responds with 404 when passed with a number not assigned to comment_id", () => {
+    return request(app)
+      .delete("/api/comments/1000")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Comment with id 1000 Not Found");
+      })
   });
 });
