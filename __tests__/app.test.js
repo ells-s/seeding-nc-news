@@ -257,3 +257,79 @@ describe("POST /api/articles/:article_id/comments", () => {
       });
   });
 });
+
+describe("PATCH /api/articles/:article_id", () => {
+  test("200 updates an articles votes and responds with the updated article when passed a positive number", () => {
+    return request(app)
+      .patch("/api/articles/2")
+      .send({ inc_votes: 100 })
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.updatedArticle).toMatchObject({
+          article_id: 2,
+          title: expect.any(String),
+          topic: expect.any(String),
+          author: expect.any(String),
+          body: expect.any(String),
+          created_at: expect.any(String),
+          votes: 100,
+          article_img_url: expect.any(String)
+        });
+      });
+  });
+  test("200 updates an articles votes and responds with the updated article when passed a negative number", () => {
+    return request(app)
+      .patch("/api/articles/2")
+      .send({ inc_votes: -100 })
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.updatedArticle).toMatchObject({
+          article_id: 2,
+          title: expect.any(String),
+          topic: expect.any(String),
+          author: expect.any(String),
+          body: expect.any(String),
+          created_at: expect.any(String),
+          votes: -100,
+          article_img_url: expect.any(String)
+        });
+      });
+  });
+  test("400 responds with 400 when inc_votes is assigned an invalid data type", () => {
+    return request(app)
+      .patch("/api/articles/2")
+      .send({ inc_votes: "not valid" })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+  test("400 responds with 400 when patch is missing required data", () => {
+    return request(app)
+      .patch("/api/articles/2")
+      .send({})
+      .expect(400)
+      .then(({ body }) => {
+        console.log(body.msg)
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+  test("400 responds with 400 when article_id is assigned an invalid data type", () => {
+    return request(app)
+      .patch("/api/articles/string")
+      .send({ inc_votes: 100 })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+  test("404 responds with 404 when passed with a number not assigned to article_id", () => {
+    return request(app)
+      .patch("/api/articles/1000")
+      .send({ inc_votes: 100 })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Article with id 1000 Not Found");
+      });
+  });
+});
