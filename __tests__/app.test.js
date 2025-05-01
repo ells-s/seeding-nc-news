@@ -454,3 +454,44 @@ describe("GET /api/articles?sort_by=:property&order=:order", () => {
       });
   });
 });
+
+describe("GET /api/articles?topic=:topic", () => {
+  test("200: responds with all requested articles for specified topic", () => {
+    return request(app)
+      .get("/api/articles?topic=mitch")
+      .expect(200)
+      .then(({ body }) => {
+        expect(Array.isArray(body.articles)).toBe(true);
+        expect(body.articles.length).toBe(12);
+        body.articles.forEach((article) => {
+          expect(typeof article.article_id).toBe("number");
+          expect(typeof article.title).toBe("string");
+          expect(article.topic).toBe("mitch");
+          expect(typeof article.author).toBe("string");
+          expect(typeof article.created_at).toBe("string");
+          expect(typeof article.votes).toBe("number");
+          expect(typeof article.article_img_url).toBe("string");
+          expect(typeof article.comment_count).toBe("number");
+          expect(article).not.toHaveProperty("body")
+        });
+        expect(body.articles).toBeSortedBy("created_at", { descending: true });
+      });
+  });
+  test("200: responds with an empty array when topic exists but no articles have that topic", () => {
+    return request(app)
+      .get("/api/articles?topic=paper")
+      .expect(200)
+      .then(({ body }) => {
+        expect(Array.isArray(body.articles)).toBe(true);
+        expect(body.articles.length).toBe(0);
+      });
+  });
+  test("404: responds with 404 when requested topic doesn't exist in the topic table", () => {
+    return request(app)
+      .get("/api/articles?topic=paperz")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Topic 'paperz' not found in topics table")
+      });
+  });
+});
