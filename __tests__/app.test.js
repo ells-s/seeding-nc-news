@@ -495,3 +495,40 @@ describe("GET /api/articles?topic=:topic", () => {
       });
   });
 });
+
+describe("GET /api/articles/:article_id adding comment_count", () => {
+  test("200: responds with the requested article with comment_count for specifed article", () => {
+    return request(app)
+      .get("/api/articles/1")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body).toHaveProperty("article");
+        expect(body.article[0].article_id).toBe(1);
+        expect(body.article[0].title).toBe("Living in the shadow of a great man");
+        expect(body.article[0].topic).toBe("mitch");
+        expect(body.article[0].author).toBe("butter_bridge");
+        expect(body.article[0].body).toBe("I find this existence challenging");
+        expect(body.article[0].created_at).toBe("2020-07-09T20:11:00.000Z");
+        expect(body.article[0].votes).toBe(100);
+        expect(body.article[0].article_img_url).toBe("https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700");
+        expect(body.article[0].comment_count).toBe(11);
+      });
+  });
+  test("200: responds with the requested article with comment_count set to 0 when there are no comments for the article", () => {
+    return request(app)
+      .get("/api/articles/2")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body).toHaveProperty("article");
+        expect(body.article[0].article_id).toBe(2);
+        expect(body.article[0].title).toBe("Sony Vaio; or, The Laptop");
+        expect(body.article[0].topic).toBe("mitch");
+        expect(body.article[0].author).toBe("icellusedkars");
+        expect(body.article[0].body).toBe("Call me Mitchell. Some years ago—never mind how long precisely—having little or no money in my purse, and nothing particular to interest me on shore, I thought I would buy a laptop about a little and see the codey part of the world. It is a way I have of driving off the spleen and regulating the circulation. Whenever I find myself growing grim about the mouth; whenever it is a damp, drizzly November in my soul; whenever I find myself involuntarily pausing before coffin warehouses, and bringing up the rear of every funeral I meet; and especially whenever my hypos get such an upper hand of me, that it requires a strong moral principle to prevent me from deliberately stepping into the street, and methodically knocking people’s hats off—then, I account it high time to get to coding as soon as I can. This is my substitute for pistol and ball. With a philosophical flourish Cato throws himself upon his sword; I quietly take to the laptop. There is nothing surprising in this. If they but knew it, almost all men in their degree, some time or other, cherish very nearly the same feelings towards the the Vaio with me.");
+        expect(body.article[0].created_at).toBe("2020-10-16T05:03:00.000Z");
+        expect(body.article[0].votes).toBe(0);
+        expect(body.article[0].article_img_url).toBe("https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700");
+        expect(body.article[0].comment_count).toBe(0);
+      });
+  });
+});
