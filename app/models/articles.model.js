@@ -7,31 +7,37 @@ exports.selectArticleById = (article_id) => {
         });
 };
 
-exports.selectArticles = (sort_by = "created_at", order = "DESC") => {
+exports.selectArticles = (sort_by = "created_at", order = "DESC", topic) => {
     // query string to add to
-    let queryString = `SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, COUNT (comments.comment_id) ::INT AS comment_count FROM articles LEFT JOIN comments ON articles.article_id = comments.article_id GROUP BY articles.article_id ORDER BY`
+    let queryString = `SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, COUNT (comments.comment_id) ::INT AS comment_count FROM articles LEFT JOIN comments ON articles.article_id = comments.article_id`;
+    const queryArgs = [];
+
+    // topic filter
+    if (topic) {
+        queryString += ` WHERE topic = $1`;
+        queryArgs.push(topic);
+    };
+    queryString += ` GROUP BY articles.article_id`;
 
     //greenlisted column names
     const greenlistedSortProperties = ["title", "topic", "author", "created_at", "votes", "article_img_url", "article_id", "comment_count"];
 
-    // if greenlistedSortProperties does not include sortby promise reject 400
+    // if greenlistedSortProperties does not include sortby promise reject 400 else adds sort_by to queryString
     if (!greenlistedSortProperties.includes(sort_by)) {
-        return Promise.reject({ status: 400, msg: `${sort_by} is an invalid sort_by column` })
-    }
-
-    queryString += ` ${sort_by}`
+        return Promise.reject({ status: 400, msg: `${sort_by} is an invalid sort_by column` });
+    };
+    queryString += ` ORDER BY ${sort_by}`;
 
     // valid order options
     const validSortOrders = ["ASC", "DESC"];
 
-    // if validSortOrders does not include order promise reject 400
+    // if validSortOrders does not include order promise reject 400 else adds order to queryString
     if (!validSortOrders.includes(order.toUpperCase())) {
-        return Promise.reject({ status: 400, msg: `${order} is an invalid order value` })
-    }
+        return Promise.reject({ status: 400, msg: `${order} is an invalid order value` });
+    };
+    queryString += ` ${order}`;
 
-    queryString += ` ${order}`
-
-    return db.query(queryString)
+    return db.query(queryString, queryArgs)
         .then(({ rows }) => {
             return rows;
         });
