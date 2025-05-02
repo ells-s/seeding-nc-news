@@ -50,6 +50,20 @@ exports.updateArticleVotes = (inc_votes, article_id) => {
         });
 };
 
+exports.insertArticle = (author, title, body, topic, article_img_url) => {
+    return db.query(`INSERT INTO articles (author, title, body, topic, article_img_url) VALUES ($1, $2, $3, $4, $5) RETURNING *`, [author, title, body, topic, article_img_url])
+        .then((postedArticle) => {
+            const article_id = postedArticle.rows[0].article_id
+            return article_id
+        })
+        .then((article_id) => {
+            return db.query(`SELECT articles.*, COUNT (comments.comment_id) ::INT AS comment_count FROM articles LEFT JOIN comments ON articles.article_id = comments.article_id WHERE articles.article_id = $1 GROUP BY articles.article_id`, [article_id])
+        })
+        .then(({ rows }) => {
+            return rows[0];
+        });
+};
+
 exports.checkIfArticleExists = (article_id) => {
     return db.query(`SELECT * FROM articles WHERE article_id = $1`, [article_id])
         .then(({ rows }) => {

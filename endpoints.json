@@ -165,5 +165,19 @@
         "created_at": "2020-04-06T12: 17: 00.000Z"
       }
     }
+  },
+  "POST /api/articles": {
+    "description": "posts a new article, then responds with the new article",
+    "exampleResponse": {
+      "article_id": 14,
+      "title": "How to make recycled paper",
+      "topic": "paper",
+      "author": "butter_bridge",
+      "body": "First you shred paper, then soak it in water, then blend it into pulp, finally you lift a screen through the pulp and allow it to dry.",
+      "created_at": "2025-05-02T15: 59: 22.504Z",
+      "votes": 0,
+      "article_img_url": "",
+      "comment_count": 0
+    }
   }
 }
