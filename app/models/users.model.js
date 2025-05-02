@@ -7,6 +7,13 @@ exports.selectUsers = () => {
         });
 };
 
+exports.selectUserByUsername = (username) => {
+    return db.query(`SELECT * FROM users WHERE username = $1`, [username])
+        .then(({ rows }) => {
+            return rows;
+        });
+};
+
 exports.checkIfUserExists = (username) => {
     return db.query(`SELECT * FROM users WHERE username = $1`, [username])
         .then(({ rows }) => {

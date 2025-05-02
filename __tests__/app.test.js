@@ -532,3 +532,25 @@ describe("GET /api/articles/:article_id adding comment_count", () => {
       });
   });
 });
+
+describe("GET /api/users/:username", () => {
+  test("200: responds with the requested user when provided a valid username", () => {
+    return request(app)
+      .get("/api/users/butter_bridge")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body).toHaveProperty("user");
+        expect(body.user[0].username).toBe("butter_bridge");
+        expect(body.user[0].name).toBe("jonny");
+        expect(body.user[0].avatar_url).toBe("https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg");
+      });
+  });
+  test("404: responds with 404 when passed with a not valid username", () => {
+    return request(app)
+      .get("/api/users/not_valid")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("User with username not_valid Not Found");
+      });
+  });
+});
