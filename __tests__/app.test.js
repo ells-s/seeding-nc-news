@@ -554,3 +554,74 @@ describe("GET /api/users/:username", () => {
       });
   });
 });
+
+describe("PATCH /api/comments/:comment_id", () => {
+  test("200 updates a comments votes and responds with the updated comment when passed a positive number", () => {
+    return request(app)
+      .patch("/api/comments/1")
+      .send({ inc_votes: 100 })
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.updatedComment).toMatchObject({
+          comment_id: 1,
+          article_id: 9,
+          body: expect.any(String),
+          votes: 116,
+          author: "butter_bridge",
+          created_at: "2020-04-06T12:17:00.000Z"
+        });
+      });
+  });
+  test("200 updates a comments votes and responds with the updated comment when passed a negative number", () => {
+    return request(app)
+      .patch("/api/comments/1")
+      .send({ inc_votes: -100 })
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.updatedComment).toMatchObject({
+          comment_id: 1,
+          article_id: 9,
+          body: expect.any(String),
+          votes: -84,
+          author: "butter_bridge",
+          created_at: "2020-04-06T12:17:00.000Z"
+        });
+      });
+  });
+  test("400 responds with 400 when inc_votes is assigned an invalid data type", () => {
+    return request(app)
+      .patch("/api/comments/1")
+      .send({ inc_votes: "not valid" })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+  test("400 responds with 400 when patch is missing required data", () => {
+    return request(app)
+      .patch("/api/comments/1")
+      .send({})
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+  test("400 responds with 400 when comment_id is assigned an invalid data type", () => {
+    return request(app)
+      .patch("/api/comments/string")
+      .send({ inc_votes: 100 })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+  test("404 responds with 404 when passed with a number not assigned to comment_id", () => {
+    return request(app)
+      .patch("/api/comments/1000")
+      .send({ inc_votes: 100 })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Comment with id 1000 Not Found");
+      });
+  });
+});
