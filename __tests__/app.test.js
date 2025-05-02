@@ -625,3 +625,95 @@ describe("PATCH /api/comments/:comment_id", () => {
       });
   });
 });
+
+describe("POST /api/articles", () => {
+  test("201 responds with a 201 status and responds with the newly posted article", () => {
+    const articleObj = {
+      author: "butter_bridge",
+      title: "How to make recycled paper",
+      body: "First you shred paper, then soak it in water, then blend it into pulp, finally you lift a screen through the pulp and allow it to dry.",
+      topic: "paper",
+      article_img_url: ""
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(articleObj)
+      .expect(201)
+      .then(({ body }) => {
+        expect(body.newArticle).toMatchObject({
+          author: "butter_bridge",
+          title: "How to make recycled paper",
+          body: "First you shred paper, then soak it in water, then blend it into pulp, finally you lift a screen through the pulp and allow it to dry.",
+          topic: "paper",
+          article_img_url: "",
+          article_id: 14,
+          votes: 0,
+          created_at: expect.any(String),
+          comment_count: 0
+        });
+      });
+  });
+  test("400 responds with 400 when assigned an invalid data type", () => {
+    const articleObj = {
+      author: "butter_bridge",
+      title: "How to make recycled paper",
+      body: 45,
+      topic: "paper",
+      article_img_url: ""
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(articleObj)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+  test("400 responds with 400 when a required key is missing", () => {
+    const articleObj = {
+      author: "butter_bridge",
+      title: "How to make recycled paper",
+      topic: "paper",
+      article_img_url: ""
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(articleObj)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+  test("404 responds with 404 if topic does not exist in topics table", () => {
+    const articleObj = {
+      author: "butter_bridge",
+      title: "How to make recycled paper",
+      body: "First you shred paper, then soak it in water, then blend it into pulp, finally you lift a screen through the pulp and allow it to dry.",
+      topic: "recycled paper",
+      article_img_url: ""
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(articleObj)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Topic 'recycled paper' not found in topics table");
+      });
+  });
+  test("404 responds with 404 if author does not exist in users table", () => {
+    const articleObj = {
+      author: "butter",
+      title: "How to make recycled paper",
+      body: "First you shred paper, then soak it in water, then blend it into pulp, finally you lift a screen through the pulp and allow it to dry.",
+      topic: "paper",
+      article_img_url: ""
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(articleObj)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("User with username butter Not Found");
+      });
+  });
+});

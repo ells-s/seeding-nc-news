@@ -3,7 +3,7 @@ const app = express();
 const db = require("./db/connection");
 const { getApi } = require("./app/controllers/api.controller");
 const { getTopics } = require("./app/controllers/topics.controller");
-const { getArticleById, getArticles, patchArticleVotes } = require("./app/controllers/articles.controller");
+const { getArticleById, getArticles, patchArticleVotes, postArticle } = require("./app/controllers/articles.controller");
 const { getCommentsByArticleId, postCommentToArticle, deleteCommentByCommentId, patchCommentVotes } = require("./app/controllers/comments.controller")
 const { getUsers, getUserByUsername } = require("./app/controllers/users.controller");
 
@@ -30,6 +30,8 @@ app.get("/api/users", getUsers);
 app.get("/api/users/:username", getUserByUsername);
 
 app.patch("/api/comments/:comment_id", patchCommentVotes);
+
+app.post("/api/articles", postArticle);
 
 app.all("/*splat", (req, res) => {
     res.status(404).send({ msg: "Not Found" });
