@@ -1,5 +1,5 @@
 const app = require("../../app");
-const { selectCommentsByArticleId, insertComment, removeCommentByCommentId, checkIfCommentExists } = require("../models/comments.model");
+const { selectCommentsByArticleId, insertComment, removeCommentByCommentId, updateCommentVotes, checkIfCommentExists } = require("../models/comments.model");
 const { checkIfArticleExists } = require("../models/articles.model");
 const { checkIfUserExists } = require("../models/users.model");
 
@@ -52,4 +52,20 @@ exports.deleteCommentByCommentId = (req, res, next) => {
         .catch((err) => {
             next(err)
         })
+};
+
+exports.patchCommentVotes = (req, res, next) => {
+    const { comment_id } = req.params;
+    const { inc_votes } = req.body;
+
+    checkIfCommentExists(comment_id)
+        .then(() => {
+            return updateCommentVotes(inc_votes, comment_id)
+        })
+        .then((updatedComment) => {
+            res.status(200).send({ updatedComment })
+        })
+        .catch((err) => {
+            next(err)
+        });
 };
