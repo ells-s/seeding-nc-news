@@ -106,15 +106,12 @@ const seed = ({ topicData, userData, articleData, commentData }) => {
       return db.query('SELECT article_id, title FROM articles;')
     })
     .then((result) => {
-      //console.log(result.rows)
       const articleIdFromTitleLookupArr = result.rows.map(pair => {
-        //console.log([pair.article_id, pair.title])
         return [pair.article_id, pair.title]
       })
       return articleIdFromTitleLookupArr
     })
     .then((articleIdFromTitleLookupArr) => {
-      //console.log(articleIdFromTitleLookupArr)
       const formattedCommentData = commentData.map((comment) => {
         const commentTimestamp = convertTimestampToDate(comment)
         const article_id = getArticleIdByTitle(comment.article_title, articleIdFromTitleLookupArr)
